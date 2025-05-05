@@ -8,7 +8,7 @@ from utils import all_trees, newick_to_subtrees, binary_trees
 
 
 
-def bipartf(P, cells, mutation, df, order, all_clts):
+def bipartf(P, cells, mutation, df, order, all_clts, trees=None):
     my_cell = []
     for i in range(len(df.index)):
         if df.index[i] in cells:
@@ -24,46 +24,87 @@ def bipartf(P, cells, mutation, df, order, all_clts):
     denominator = Decimal(0)
 
     treelist = None
-    if all_clts == True:
-        treelist = all_trees(n)
+    if trees == None:
+        if all_clts == True:
+            treelist = all_trees(n)
+        else:
+            treelist = binary_trees(n)
+        if order == -1:
+            for tree in treelist:
+                sts = newick_to_subtrees(tree)
+                nontrivial = sts[n + 1 : -1]
+                
+                order = len(nontrivial)
+                p = calc_prob(P, sts, order)
+
+                num = calc_prob_num(P, sts, order, cond_c, cond_m)
+                numerator += Decimal(num)
+                denominator += Decimal(p)
+        elif order == 0:
+            for tree in treelist:
+                sts = newick_to_subtrees(tree)
+                nontrivial = sts[n + 1 : -1]
+                
+                order = 0
+                p = calc_prob(P, sts, order)
+
+                cond = pf_cond_on_one_tree(P, sts, cond_c, cond_m)
+                num = Decimal(cond[0] / cond[1]) * Decimal(p)
+                numerator += Decimal(num)
+                denominator += Decimal(p)
+        else:
+            raise Exception("don't use, not tested yet")
+            for tree in treelist:
+                sts = newick_to_subtrees(tree)
+                nontrivial = sts[n + 1 : -1]
+                
+                order = min(len(nontrivial), order)
+                p = calc_prob(P, sts, order)
+
+                num = calc_prob_num(P, sts, order, cond_c, cond_m, len(nontrivial))
+                numerator += Decimal(num)
+                denominator += Decimal(p)
     else:
-        treelist = binary_trees(n)
+        with open(trees) as f:
+            if order == -1:
+                for tree in f:
+                    sts = newick_to_subtrees(tree)
+                    nontrivial = sts[n + 1 : -1]
+                    
+                    order = len(nontrivial)
+                    p = calc_prob(P, sts, order)
 
-    if order == -1:
-        for tree in treelist:
-            sts = newick_to_subtrees(tree)
-            nontrivial = sts[n + 1 : -1]
-            
-            order = len(nontrivial)
-            p = calc_prob(P, sts, order)
+                    num = calc_prob_num(P, sts, order, cond_c, cond_m)
+                    numerator += Decimal(num)
+                    denominator += Decimal(p)
+            elif order == 0:
+                for tree in f:
+                    sts = newick_to_subtrees(tree)
+                    nontrivial = sts[n + 1 : -1]
+                    
+                    order = 0
+                    p = calc_prob(P, sts, order)
 
-            num = calc_prob_num(P, sts, order, cond_c, cond_m)
-            numerator += Decimal(num)
-            denominator += Decimal(p)
-    elif order == 0:
-        for tree in treelist:
-            sts = newick_to_subtrees(tree)
-            nontrivial = sts[n + 1 : -1]
-            
-            order = 0
-            p = calc_prob(P, sts, order)
+                    cond = pf_cond_on_one_tree(P, sts, cond_c, cond_m)
+                    num = Decimal(cond[0] / cond[1]) * Decimal(p)
+                    numerator += Decimal(num)
+                    denominator += Decimal(p)
+            else:
+                raise Exception("don't use, not tested yet")
+                for tree in f:
+                    sts = newick_to_subtrees(tree)
+                    nontrivial = sts[n + 1 : -1]
+                    
+                    order = min(len(nontrivial), order)
+                    p = calc_prob(P, sts, order)
 
-            cond = pf_cond_on_one_tree(P, sts, cond_c, cond_m)
-            num = Decimal(cond[0] / cond[1]) * Decimal(p)
-            numerator += Decimal(num)
-            denominator += Decimal(p)
-    else:
-        raise Exception("don't use, not tested yet")
-        for tree in treelist:
-            sts = newick_to_subtrees(tree)
-            nontrivial = sts[n + 1 : -1]
-            
-            order = min(len(nontrivial), order)
-            p = calc_prob(P, sts, order)
+                    num = calc_prob_num(P, sts, order, cond_c, cond_m, len(nontrivial))
+                    numerator += Decimal(num)
+                    denominator += Decimal(p)
 
-            num = calc_prob_num(P, sts, order, cond_c, cond_m, len(nontrivial))
-            numerator += Decimal(num)
-            denominator += Decimal(p)
+        
+
+    
     return numerator, denominator, numerator / denominator
 
 def exact_partf(P, cells, mutation, df):
@@ -141,7 +182,7 @@ def main(args):
 
     pstr = None
 
-    ret = bipartf(P, cells, mutation, df, order=args.order, all_clts=bool(args.all_trees))
+    ret = bipartf(P, cells, mutation, df, order=args.order, all_clts=bool(args.all_trees), trees=args.trees)
     pstr = [str(ret[0]), str(ret[1]), str(float(ret[2]))]
     # print(args.all_trees)
     # if args.all_trees == 1:
@@ -155,6 +196,10 @@ def main(args):
         output += ["binary"]
     else:
         output += ["all"]
+    if args.trees == None:
+        output += ["None"]
+    else:
+        output += [args.trees]
     output += [str(args.order)]
     output += pstr
     print("\t".join(output))
@@ -177,6 +222,9 @@ if __name__ == "__main__":
                         help="1 for all trees, 0 for binary", required=True)
     parser.add_argument("-o", "--order", type=int,                                                    
                         help="Order of the approximation (0 for just X consistent with T, -1 for X yields T, i <= n of cells - 2^th order approximation)", required=True)
+    parser.add_argument("-t", "--trees", type=str,                                                    
+                        help="Path to file containing trees", required=False)
+    
     
 
     main(parser.parse_args())
