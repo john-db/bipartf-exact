@@ -2,6 +2,7 @@ import pandas as pd
 from decimal import Decimal
 import numpy as np
 import argparse
+import time
 #
 from tree_scorer import calc_prob, pf_cond_on_one_tree, calc_prob_num
 from utils import all_trees, newick_to_subtrees, binary_trees
@@ -192,6 +193,7 @@ def main(args):
 
     pstr = None
 
+    start = time.time()
     ret = bipartf(P, cells, mutation, df, order=args.order, all_clts=bool(args.all_trees), trees=args.trees)
     pstr = [str(ret[0]), str(ret[1]), str(float(ret[2]))]
     # print(args.all_trees)
@@ -201,7 +203,8 @@ def main(args):
     #     print("hi")
     #     pstr = [str(our_partf(P, cells, mutation, df)[0]), str(our_partf(P, cells, mutation, df)[1]), str(float(our_partf(P, cells, mutation, df)[2]))]
 
-    output = list(map(lambda x: str(x), [args.input_matrix, args.cells, args.mutation, args.alpha, args.beta]))
+    end = time.time()
+    output = list(map(lambda x: str(x), [args.input_matrix, args.cells, args.mutation, args.alpha, args.beta, (end-start)]))
     if args.all_trees == 0:
         output += ["binary"]
     else:
