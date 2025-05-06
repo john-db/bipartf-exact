@@ -19,7 +19,7 @@ def calc_prob_num(P, subtrees, order, clade, column):
         col = P[:, column]
         colscore = 2 ** Decimal(np.dot(np.log2(col), clade) + np.dot(np.log2(1 - col), 1 - clade))
         s1 = calc_prob(P_restrict, subtrees, order)
-        if sum(clade) == 1 or sum(clade) == len(subtrees[0]):
+        if sum(clade) <= 1 or sum(clade) == len(subtrees[0]):
             return colscore * s1
         else:
             if order - 1 >= 0:
