@@ -55,7 +55,7 @@ def newick_to_subtrees(newick):
     n = len(list(leaves))
 
     subtrees = []
-    for node in tree.traverse_preorder():
+    for node in tree.traverse_levelorder():
         subtree = np.zeros(n, dtype=np.int8)
         leaves = [int(leaf.get_label()) for leaf in node.traverse_leaves()]
         subtree[leaves] = 1
