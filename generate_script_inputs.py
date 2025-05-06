@@ -1,6 +1,7 @@
 import pandas as pd
 
 folder = ""
+folder_trees = ""
 
 n_ls = [5,6,7,8]
 m_ls = [8,10,12,15,20,50,100,200,500,1000]
@@ -17,12 +18,30 @@ for repl in repl_ls:
                         params = [repl,n,m,fp,fn,na]
                         params = map(str, params)
                         sim = "simNo_{}-n_{}-m_{}-fp_{}-fn_{}-na_{}".format(*params)
-                        sim += ".SC.after_noise"
                         
-                        path = folder + sim
-                        df = pd.read_csv(path, sep="\t", index_col=[0])
+                        path_trees = folder_trees  + str(n) + "_leaf_clade_matrices.lin"
+
+                        path_noise = folder + sim + ".SC.after_noise"
+                        df = pd.read_csv(path_noise, sep="\t", index_col=[0])
                         for j in min(m, 100):
-                            mutation = "mut" + str(j)
-                            col = df[mutation]
+                            mut = "mut" + str(j)
+                            col = df[mut]
                             clade = [c for c in col.keys() if col[c] == 1]
-                            print([sim, clade, mutation])
+                            clade = ",".join(clade)
+                            print(" ".join([sim, clade, mut]))
+
+                            cmd = "sbatch"
+                            name = 'bpf-ex.' + '.'.join(params + [mut])
+                            cmd += ' --job-name="' + name + '"'
+                            cmd += ' --output="' + name + '.%j.out"'
+                            cmd += ' --error="' + name + '.%j.err"'
+                            cmd += ' --export=CLADE="' + clade + '"'
+                            cmd += ',MUT="' + mut + '"'
+                            cmd += ',ALPHA="' + str(fp) + '"'
+                            cmd += ',BETA="' + str(fn) + '"'
+                            cmd += ',INPUT="' + path_noise + '"'
+                            cmd += ',TREES="' + path_trees + '"'
+                            cmd += ',ORDER="' + "-1" + '"'
+                            cmd += ',ALLTREES="' + "1" + '"'
+                            cmd += ' bpf-exact-long-sims.sbatch'
+                            print(cmd)
