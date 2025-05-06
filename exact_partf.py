@@ -183,7 +183,7 @@ def main(args):
     alpha = args.alpha
     beta = args.beta
 
-    df = pd.read_csv(path, sep=",", index_col=[0])
+    df = pd.read_csv(path, sep="\t", index_col=[0])
 
     I_mtr = df.values
     t1 = I_mtr * (1 - beta) / (alpha + 1 - beta)
