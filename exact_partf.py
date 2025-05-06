@@ -204,7 +204,7 @@ def main(args):
     #     pstr = [str(our_partf(P, cells, mutation, df)[0]), str(our_partf(P, cells, mutation, df)[1]), str(float(our_partf(P, cells, mutation, df)[2]))]
 
     end = time.time()
-    output = list(map(lambda x: str(x), [args.input_matrix, args.cells, args.mutation, args.alpha, args.beta, (end-start)]))
+    output = list(map(lambda x: str(x), [args.input_matrix, round(end-start, 5), args.cells, args.mutation, args.alpha, args.beta]))
     if args.all_trees == 0:
         output += ["binary"]
     else:
