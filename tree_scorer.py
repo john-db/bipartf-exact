@@ -14,7 +14,7 @@ def calc_prob_num(P, subtrees, order, clade, column):
     if cladeidx == None:
         return Decimal(0)
     else:
-        subtrees_restrict = subtrees[:cladeidx] + subtrees[cladeidx+1:]
+        subtrees_restrict = np.vstack((subtrees[:cladeidx], subtrees[cladeidx+1:]))
         P_restrict = np.delete(P, column, axis=1)
         col = P[:, column]
         colscore = 2 ** Decimal(np.dot(np.log2(col), clade) + np.dot(np.log2(1 - col), 1 - clade))
@@ -32,7 +32,7 @@ def calc_prob_num(P, subtrees, order, clade, column):
 def calc_prob(P, subtrees, order):
     n = len(subtrees[0])
 
-    nontrivial = list(subtrees[n + 1:-1])
+    nontrivial = subtrees[n + 1:-1, :]
 
     logP = np.log2(P)
     logPC = np.log2(1 - P)
@@ -41,13 +41,20 @@ def calc_prob(P, subtrees, order):
     for size in range(1, order + 1):
         temp = Decimal(0)
         for c in comb(len(nontrivial), size):
-            restricted_subtrees = nontrivial[0:c[0]]
-            for i in range(len(c)):
-                if i < len(c) - 1:
-                    restricted_subtrees += nontrivial[c[i] + 1 : c[i + 1]]
-            restricted_subtrees += nontrivial[c[-1] + 1:]
-            restricted_subtrees += subtrees[0:n+1]
-            restricted_subtrees += [subtrees[-1]]
+            # restricted_subtrees = nontrivial[0:c[0]]
+            # for i in range(len(c)):
+            #     if i < len(c) - 1:
+            #         restricted_subtrees += nontrivial[c[i] + 1 : c[i + 1]]
+            # restricted_subtrees += nontrivial[c[-1] + 1:]
+            # restricted_subtrees += subtrees[0:n+1]
+            # restricted_subtrees += [subtrees[-1]]
+            restricted_subtrees = np.vstack((
+                nontrivial[0:c[0], :],
+                *(nontrivial[c[i] + 1 : c[i + 1], :] for i in range(len(c) - 1)),
+                nontrivial[c[-1] + 1:, :],
+                subtrees[0:n+1, :],
+                subtrees[-1:, :]
+            ))
             temp += 2 ** Decimal(prob_mat_mul_calc(logP, logPC, np.array(restricted_subtrees)))
         if temp != 1:
             correction += (Decimal(-1) ** (size)) * temp

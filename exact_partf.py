@@ -68,8 +68,11 @@ def bipartf(P, cells, mutation, df, order, all_clts, trees=None):
         with open(trees) as f:
             if order == -1:
                 for tree in f:
-                    sts = newick_to_subtrees(tree)
-                    nontrivial = sts[n + 1 : -1]
+                    tree = tree.strip()
+                    sts = np.zeros(shape=(len(tree) // n, n), dtype=np.int8)
+                    for i in range(len(tree)):
+                        sts[np.unravel_index(i, sts.shape)] = int(tree[i])
+                    nontrivial = sts[n + 1 : -1, :]
                     
                     order = len(nontrivial)
                     p = calc_prob(P, sts, order)
@@ -79,8 +82,11 @@ def bipartf(P, cells, mutation, df, order, all_clts, trees=None):
                     denominator += Decimal(p)
             elif order == 0:
                 for tree in f:
-                    sts = newick_to_subtrees(tree)
-                    nontrivial = sts[n + 1 : -1]
+                    tree = tree.strip()
+                    sts = np.zeros(shape=(len(tree) // n, n), dtype=np.int8)
+                    for i in range(len(tree)):
+                        sts[np.unravel_index(i, sts.shape)] = int(tree[i])
+                    nontrivial = sts[n + 1 : -1, :]
                     
                     order = 0
                     p = calc_prob(P, sts, order)
@@ -92,7 +98,11 @@ def bipartf(P, cells, mutation, df, order, all_clts, trees=None):
             else:
                 raise Exception("don't use, not tested yet")
                 for tree in f:
-                    sts = newick_to_subtrees(tree)
+                    tree = tree.strip()
+                    sts = np.zeros(shape=(len(tree) // n, n), dtype=np.int8)
+                    for i in range(len(tree)):
+                        sts[np.unravel_index(i, sts.shape)] = int(tree[i])
+                    sts = list(sts)
                     nontrivial = sts[n + 1 : -1]
                     
                     order = min(len(nontrivial), order)
