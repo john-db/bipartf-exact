@@ -1,4 +1,4 @@
-from utils import all_trees
+from utils import binary_trees
 from itertools import product
 import argparse
 
@@ -65,8 +65,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     n=args.cells
-    leaves = set(range(n))
-    all_trees_new = trees(leaves)
+    #leaves = set(range(n))
+    #all_trees_new = trees(leaves)
     
-    for tree in all_trees_new:
-        print(print_set(tree) + ";")
+    #for tree in all_trees_new:
+        #print(print_set(tree) + ";")
+    for tree in binary_trees(n):
+        print(tree)
