@@ -13,7 +13,7 @@ where:
 ```<path_to_input_matrix>``` is the path to your input genotype matrix (see examples in example/ directory)
 ```<clade>``` is the clade of interest given as a comma-separated list of labels of the rows of the input matrix
 ```<mutation>``` label of the mutation of interest from input matrix
-```<false_positive_rate>``` and ```<false_negative_rate>``` are the probablities of false-positives and false-negatives (expressed as a real number between 0 and 1)
+```<false_positive_rate>``` and ```<false_negative_rate>``` are the probablities of false-positives and false-negatives (expressed as real numbers between 0 and 1)
 
 
 ```
