@@ -31,3 +31,4 @@ TEMP_NAME=$(mktemp); python src/gen_trees.py -n 5 > "$TEMP_NAME" && python src/e
 ```
 TEMP_NAME=$(mktemp); python src/gen_trees.py -n 5 > "$TEMP_NAME" && python src/exact_partf.py -i ./example/example-5x1000.tsv -c "cell_1,cell_2" -m "mut_1" -fp 0.01 -fn 0.1 -t "$TEMP_NAME"
 ```
+(note that these commands are generating trees and storing them to a temporary file, and then running the exact bipartition function)
